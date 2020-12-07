@@ -59,7 +59,7 @@ class Player {
 
   private:
     // 0 -> water, 1-> hit water, 2 -> ship, 3 -> sunken ship
-    int board[BOARD_SIZE][BOARD_SIZE] = {};
+    unsigned short board[BOARD_SIZE][BOARD_SIZE] = {};
     std::vector<std::vector<Ship>> ships = {
         std::vector<Ship>(4, Ship(2)), std::vector<Ship>(3, Ship(3)),
         std::vector<Ship>(2, Ship(4)), std::vector<Ship>(1, Ship(6))};
