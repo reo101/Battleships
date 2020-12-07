@@ -21,9 +21,14 @@ class Player {
   public:
     Player() {
         // Blank constructor
+        board[4][4] = 2;
         board[4][5] = 3;
-        board[2][3] = 2;
-        board[1][2] = 1;
+        board[4][6] = 3;
+        board[4][7] = 2;
+        board[2][3] = 1;
+        board[1][2] = 2;
+        board[2][2] = 2;
+        board[3][2] = 2;
     }
     Player(std::string path) {
         // Import data from file
@@ -32,7 +37,7 @@ class Player {
     void initBoard() {
         clearScreen();
         std::cout << std::endl << "Choose player name:" << std::endl;
-        std::cin >> playerName;
+        // std::cin >> playerName; //FIXME
         char option;
         do {
             clearScreen();
@@ -78,6 +83,13 @@ class Player {
     // ╠═══╬═══╣
     // ║   ║   ║
     // ╚═══╩═══╝
+    // ╔═════╦═════╗
+    // ║     ║     ║
+    // ║     ║     ║
+    // ╠═════╬═════╣
+    // ║     ║     ║
+    // ║     ║     ║
+    // ╚═════╩═════╝
     void drawBoard() {
         char letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                           'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'};
@@ -102,16 +114,20 @@ class Player {
             for (int col = 0; col < BOARD_SIZE; ++col) {
                 switch (board[row][col]) {
                 case 0: // water
-                    rowBuffer[col] = "   ";
+                    rowBuffer[col] = " \033[m \033[0m ";
+                    // rowBuffer[col] = "   ";
                     break;
                 case 1: // hit water
-                    rowBuffer[col] = " X ";
+                    rowBuffer[col] = " \033[1mX\033[0m ";
+                    // rowBuffer[col] = " X ";
                     break;
                 case 2: // ship
-                    rowBuffer[col] = " ◯ ";
+                    rowBuffer[col] = "\033[7;1m   \033[0m";
+                    // rowBuffer[col] = " ◯ ";
                     break;
                 case 3: // sunken ship
-                    rowBuffer[col] = " ∅ ";
+                    rowBuffer[col] = "\033[7;1m X \033[0m";
+                    // rowBuffer[col] = " ∅ ";
                     break;
                 }
             }
@@ -163,7 +179,6 @@ class Player {
 int main() {
 
     Player test;
-    test.drawBoard();
 
     test.initBoard();
 
