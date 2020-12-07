@@ -121,9 +121,9 @@ class Player {
                 std::cout << "║" << rowBuffer[col];
             }
             std::cout << "║" << std::endl;
-            printLine(BOARD_SIZE + 1, "═══", (row < BOARD_SIZE - 1 ? "╠" : "╚"),
-                      (row < BOARD_SIZE - 1 ? "╬" : "╩"),
-                      (row < BOARD_SIZE - 1 ? "╣" : "╝"));
+            bool inMiddle = row < BOARD_SIZE - 1;
+            printLine(BOARD_SIZE + 1, "═══", (inMiddle ? "╠" : "╚"),
+                      (inMiddle ? "╬" : "╩"), (inMiddle ? "╣" : "╝"));
         }
     }
 
