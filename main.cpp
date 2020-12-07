@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <stdlib.h> //temp for clearing screen
 #include <string>
@@ -16,6 +17,21 @@ void printLine(int count, std::string str, std::string before = "",
     }
     std::cout << after << std::endl;
 }
+
+void printChar(int count, char ch) {
+    for (int i = 0; i < count; ++i) {
+        std::cout << ch;
+    }
+}
+
+void invertColours() { std::cout << "\033[7;1m"; }
+void revertColours() { std::cout << "\033[0m"; }
+
+struct Ship {
+    const int size;
+    int count;
+    Ship(int _size, int _count) : size(_size), count(_count) {}
+};
 
 class Player {
   public:
@@ -39,16 +55,23 @@ class Player {
         std::cout << std::endl << "Choose player name:" << std::endl;
         // std::cin >> playerName; //FIXME
         char option;
+        bool wasInvalid = false;
         do {
             clearScreen();
             drawBoard();
             std::cout << std::endl
-                      << "Please select an option:\n"
+                      << "Please select an option:\n\n"
                          "1. Add ship\n"
                          "2. Edit ship\n"
                          "3. Reset board\n"
                          "4. Commit board\n"
                       << std::endl;
+            if (wasInvalid) {
+                std::cout << "Invalid option \"" << option << "\" selected"
+                          << std::endl
+                          << std::endl;
+            }
+            wasInvalid = false;
             std::cin >> option;
             std::cin.clear();
             switch (option) {
@@ -65,8 +88,7 @@ class Player {
                 commitBoard();
                 break;
             default:
-                std::cout << "Invalid option \"" << option << "\" selected"
-                          << std::endl;
+                wasInvalid = true;
             }
         } while (option != '4');
     }
@@ -145,6 +167,40 @@ class Player {
 
     void addShip() {
         // add ship
+        char option;
+        bool wasInvalid = false;
+        do {
+            clearScreen();
+            drawBoard();
+            std::cout << std::endl
+                      << "Select which ship to add:" << std::endl
+                      << std::endl;
+            for (size_t i = 0; i < remainingShips.size(); ++i) {
+                if (remainingShips[i].count == 0) {
+                    invertColours();
+                }
+
+                std::cout << (i + 1) << ". ";
+                printChar(remainingShips[i].size, 'X');
+
+                std::cout << std::setw(15 - remainingShips[i].size)
+                          << remainingShips[i].count << " left" << std::endl;
+
+                if (remainingShips[i].size == 0) {
+                    revertColours();
+                }
+            }
+            std::cout << "0. Go back to main menu" << std::endl << std::endl;
+            if (wasInvalid) {
+                std::cout << "Invalid option \"" << option << "\" selected"
+                          << std::endl
+                          << std::endl;
+            }
+            wasInvalid = false;
+            std::cin >> option;
+            std::cin.clear();
+
+        } while (true);
     }
 
     void editShip() {
@@ -167,7 +223,9 @@ class Player {
   private:
     // 0 -> water, 1-> hit water, 2 -> ship, 3 -> sunken ship
     int board[BOARD_SIZE][BOARD_SIZE] = {};
-    int unsunkenShipsCount;
+    std::vector<Ship> remainingShips = {Ship(2, 4), Ship(3, 3), Ship(4, 2),
+                                        Ship(6, 1)};
+    //{{4, 2}, {3, 3}, {2, 4}, {1, 6}}; // {count, length}
     std::string playerName;
 };
 
