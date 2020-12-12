@@ -38,8 +38,12 @@ class Coordinates {
 struct Ship {
     const int size;
     Coordinates coords;
+    char direction;
+    Ship(const Ship &ship)
+        : size(ship.size), coords(ship.coords.x, ship.coords.y) {}
     Ship(int _size) : size(_size) {}
-    Ship(int _size, Coordinates _coords) : size(_size), coords(_coords) {}
+    Ship(int _size, int _x, int _y, char _direction)
+        : size(_size), coords(_x, _y), direction(_direction) {}
 };
 
 class Player {
@@ -49,12 +53,15 @@ class Player {
 
     void initBoard();
     void initPlayer();
-    void drawBoard();
+    void drawBoard(bool = false);
 
     void addShip();
-    void selectCoordinatesForShip(int);
-    bool tryPlacingShip(int, int, int, char);
+    void selectCoordinatesForShip(int, bool = true);
+    bool tryPlacingShip(int, int, int, char, bool = true);
     void editShip();
+    void tryEditingShip(int);
+    void hideShip(int);
+    void showShip(int);
     void resetBoard();
     void commitBoard();
 
@@ -66,7 +73,7 @@ class Player {
     std::vector<std::vector<Ship>> remainingShips = {
         std::vector<Ship>(4, Ship(2)), std::vector<Ship>(3, Ship(3)),
         std::vector<Ship>(2, Ship(4)), std::vector<Ship>(1, Ship(6))};
-    std::vector<Ship> ships;
+    std::vector<Ship *> ships;
     std::string playerName;
 };
 
@@ -86,14 +93,7 @@ int main() {
 
 Player::Player() {
     // Blank constructor
-    // board[4][4] = 1;
-    // board[4][5] = 3;
-    // board[4][6] = 3;
-    // board[4][7] = 1;
-    // board[2][3] = 2;
-    // board[1][2] = 1;
-    // board[2][2] = 1;
-    // board[3][2] = 1;
+    ships.reserve(10); // FIXME magic number
 }
 
 Player::Player(std::string path) {
@@ -166,7 +166,7 @@ void Player::initPlayer() {
 // ║     ║     ║
 // ║     ║     ║
 // ╚═════╩═════╝
-void Player::drawBoard() {
+void Player::drawBoard(bool drawLabels) { // Default value set in prototype
     char letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                       'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'};
     char digits[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'X'};
@@ -208,9 +208,33 @@ void Player::drawBoard() {
             }
         }
         // And print that buffer togheter with the line separator
+        bool shipHeadFound;
         std::cout << "║ " << digits[row] << " ";
         for (int col = 0; col < BOARD_SIZE; ++col) {
-            std::cout << "║" << rowBuffer[col];
+            std::cout << "║";
+            if (drawLabels) {
+                for (size_t i = 0; i < ships.size(); ++i) {
+                    // std::cout << "Checking if col/row " << col << "/" << row
+                    //<< " is a ship at x/y " << ships[i]->coords.x
+                    //<< "/" << ships[i]->coords.y << std::endl;
+                    if (ships[i]->coords.x == col &&
+                        ships[i]->coords.y == row) {
+
+                        invertColours();
+                        std::cout << " " << letters[i] << " ";
+                        revertColours();
+
+                        shipHeadFound = true;
+                        break;
+                    }
+                }
+            }
+            if (shipHeadFound) {
+                shipHeadFound = false;
+                continue;
+            } else {
+                std::cout << rowBuffer[col];
+            }
         }
         std::cout << "║" << std::endl;
         bool inMiddle = row < BOARD_SIZE - 1;
@@ -256,7 +280,6 @@ void Player::addShip() {
             std::cout << message << std::endl << std::endl;
             message = "";
         }
-        wasInvalid = false;
         std::cin >> option;
         std::cin.clear();
 
@@ -284,7 +307,7 @@ void Player::addShip() {
     } while (true);
 }
 
-void Player::selectCoordinatesForShip(int index) {
+void Player::selectCoordinatesForShip(int index, bool isNew) {
     char option[3];
     int row, col;
     char direction;
@@ -296,7 +319,8 @@ void Player::selectCoordinatesForShip(int index) {
         drawBoard();
         std::cout << std::endl
                   << "Select where to add a ship with length "
-                  << remainingShips[index][0].size
+                  << (isNew ? remainingShips[index][0].size
+                            : ships[index]->size)
                   << " (in format A1R [Column A-J, Row 1-X, Direction "
                      "Right/Left]) or 0 to go back:"
                   << std::endl
@@ -339,7 +363,7 @@ void Player::selectCoordinatesForShip(int index) {
             continue;
         }
 
-        success = tryPlacingShip(index, col, row, direction);
+        success = tryPlacingShip(index, col, row, direction, isNew);
 
         if (success) {
             // message = "Successfully added a ship";
@@ -352,9 +376,10 @@ void Player::selectCoordinatesForShip(int index) {
     } while (true);
 }
 
-bool Player::tryPlacingShip(int index, int col, int row, char direction) {
+bool Player::tryPlacingShip(int index, int col, int row, char direction,
+                            bool isNew) {
 
-    int size = remainingShips[index][0].size;
+    int size = (isNew ? remainingShips[index][0].size : ships[index]->size);
 
     int rowOffset = 0, colOffset = 0;
 
@@ -393,18 +418,103 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction) {
         }
     }
 
-    for (int i = 0; i < size; ++i) {
-        board[row + rowOffset * i][col + colOffset * i] = 1;
-    }
+    if (isNew) {
+        for (int i = 0; i < size; ++i) {
+            board[row + rowOffset * i][col + colOffset * i] = 1;
+        }
 
-    remainingShips[index].pop_back();
-    ships.push_back(Ship(size, Coordinates(row, col)));
+        ships.push_back(new Ship(size, col, row, direction));
+        remainingShips[index].pop_back();
+    } else {
+        ships[index]->coords.x = col;
+        ships[index]->coords.y = row;
+        ships[index]->direction = direction;
+
+        showShip(index);
+    }
 
     return true;
 }
 
 void Player::editShip() {
     // edit ship
+    char option;
+    bool wasInvalid = false;
+    std::string message;
+    do {
+        clearScreen();
+        drawBoard(true);
+        std::cout << std::endl
+                  << "Select which ship to add or 0 to go back to main menu:"
+                  << std::endl
+                  << std::endl;
+
+        if (message.length() > 0) {
+            if (wasInvalid) {
+                std::cout << "Error!" << std::endl;
+                wasInvalid = false;
+            }
+            std::cout << message << std::endl << std::endl;
+            message = "";
+        }
+        std::cin >> option;
+        std::cin.clear();
+
+        if (option == '0') {
+            return;
+        }
+
+        std::cout << (option - 'A') << std::endl;
+        std::cout << ((int)ships.size()) << std::endl;
+        std::cin.get();
+        if (option - 'A' < 0 || option - 'A' > (int)ships.size()) {
+            std::cout << "Invalid option selected" << std::endl;
+            wasInvalid = true;
+            continue;
+        }
+
+        tryEditingShip(option - 'A');
+
+        // for (int i = 0; i < (int)ships.size(); ++i) {
+        // if (i == option - '1') {
+        // if (remainingShips[i].size() == 0) {
+        // wasInvalid = true;
+        // message = "No more ships of that kind";
+        // continue;
+        //}
+        // selectCoordinatesForShip(i);
+        // continue;
+        //}
+        //}
+    } while (true);
+}
+
+void Player::tryEditingShip(int index) {
+    hideShip(index);
+    selectCoordinatesForShip(index, false);
+    // showShip(index);
+}
+
+void Player::hideShip(int index) {
+    int xOffset = 0, yOffset = 0;
+
+    (ships[index]->direction == 'R' ? xOffset : yOffset) = 1;
+
+    for (int i = 0; i < ships[index]->size; ++i) {
+        board[ships[index]->coords.y + yOffset * i]
+             [ships[index]->coords.x + xOffset * i] = 0;
+    }
+}
+
+void Player::showShip(int index) {
+    int xOffset = 0, yOffset = 0;
+
+    (ships[index]->direction == 'R' ? xOffset : yOffset) = 1;
+
+    for (int i = 0; i < ships[index]->size; ++i) {
+        board[ships[index]->coords.y + yOffset * i]
+             [ships[index]->coords.x + xOffset * i] = 1;
+    }
 }
 
 void Player::resetBoard() {
