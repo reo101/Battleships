@@ -52,7 +52,7 @@ class Player {
     void drawBoard();
 
     void addShip();
-    void addShipAtLocation(int);
+    void selectCoordinatesForShip(int);
     bool tryPlacingShip(int, int, int, char);
     void editShip();
     void resetBoard();
@@ -279,14 +279,14 @@ void Player::addShip() {
                     message = "No more ships of that kind";
                     continue;
                 }
-                addShipAtLocation(i);
+                selectCoordinatesForShip(i);
                 continue;
             }
         }
     } while (true);
 }
 
-void Player::addShipAtLocation(int index) {
+void Player::selectCoordinatesForShip(int index) {
     char option[3];
     int row, col;
     char direction;
