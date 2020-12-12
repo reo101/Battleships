@@ -225,7 +225,7 @@ void Player::addShip() {
     // add ship
     char option;
     bool wasInvalid = false;
-    std::string errorMessage;
+    std::string message;
     do {
         clearScreen();
         drawBoard();
@@ -250,10 +250,13 @@ void Player::addShip() {
         }
 
         std::cout << "0. Go back to main menu" << std::endl << std::endl;
-        if (wasInvalid) {
-            std::cout << "Invalid option \"" << option << "\" selected "
-                      << errorMessage << std::endl
-                      << std::endl;
+        if (message.length() > 0) {
+            if (wasInvalid) {
+                std::cout << "Error!" << std::endl;
+                wasInvalid = false;
+            }
+            std::cout << message << std::endl << std::endl;
+            message = "";
         }
         wasInvalid = false;
         std::cin >> option;
@@ -273,7 +276,7 @@ void Player::addShip() {
             if (i == option - '1') {
                 if (remainingShips[i].size() == 0) {
                     wasInvalid = true;
-                    errorMessage = "No more ships of that kind";
+                    message = "No more ships of that kind";
                     continue;
                 }
                 addShipAtLocation(i);
@@ -288,7 +291,7 @@ void Player::addShipAtLocation(int index) {
     int row, col;
     char direction;
     bool wasInvalid = false;
-    std::string errorMessage;
+    std::string message;
     bool success;
     do {
         clearScreen();
@@ -301,12 +304,14 @@ void Player::addShipAtLocation(int index) {
                   << std::endl
                   << std::endl;
 
-        if (wasInvalid) {
-            std::cout << "Invalid option \"" << option << "\" selected "
-                      << errorMessage << std::endl
-                      << std::endl;
+        if (message.length() > 0) {
+            if (wasInvalid) {
+                std::cout << "Error!" << std::endl;
+                wasInvalid = false;
+            }
+            std::cout << message << std::endl << std::endl;
+            message = "";
         }
-        wasInvalid = false;
 
         std::cin >> option;
         std::cin.clear();
@@ -317,21 +322,21 @@ void Player::addShipAtLocation(int index) {
 
         col = option[0] - 'A';
         if ((col < 0) || (col >= BOARD_SIZE)) {
-            errorMessage = "Invalid column selected";
+            message = "Invalid column selected";
             wasInvalid = true;
             continue;
         }
 
         row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
         if ((row < 0) || (row >= BOARD_SIZE)) {
-            errorMessage = "Invalid row selected";
+            message = "Invalid row selected";
             wasInvalid = true;
             continue;
         }
 
         direction = option[2];
         if (direction != 'R' && direction != 'D') {
-            errorMessage = "Invalid direction selected";
+            message = "Invalid direction selected";
             wasInvalid = true;
             continue;
         }
@@ -339,14 +344,13 @@ void Player::addShipAtLocation(int index) {
         success = tryPlacingShip(index, col, row, direction);
 
         if (success) {
-            std::cout << "Successfully added a ship" << std::endl;
+            // message = "Successfully added a ship";
             return;
         } else {
+            message = "Cant place a ship at these coordinates";
             wasInvalid = true;
-            errorMessage = "Cant place a ship at these coordinates";
             continue;
         }
-
     } while (true);
 }
 
