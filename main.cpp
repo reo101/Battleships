@@ -66,9 +66,7 @@ class Player {
     std::vector<std::vector<Ship>> remainingShips = {
         std::vector<Ship>(4, Ship(2)), std::vector<Ship>(3, Ship(3)),
         std::vector<Ship>(2, Ship(4)), std::vector<Ship>(1, Ship(6))};
-    std::vector<std::vector<Ship>> ships = {
-        std::vector<Ship>(), std::vector<Ship>(), std::vector<Ship>(),
-        std::vector<Ship>()};
+    std::vector<Ship> ships;
     std::string playerName;
 };
 
@@ -400,7 +398,7 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction) {
     }
 
     remainingShips[index].pop_back();
-    ships[index].push_back(Ship(size, Coordinates(row, col)));
+    ships.push_back(Ship(size, Coordinates(row, col)));
 
     return true;
 }
