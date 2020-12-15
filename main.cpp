@@ -63,7 +63,7 @@ class Player {
     void hideShip(int);
     void showShip(int);
     void resetBoard();
-    void commitBoard();
+    bool commitBoard();
 
     void clearScreen();
 
@@ -99,6 +99,7 @@ void Player::initBoard() {
     // initPlayer(); //FIXME
     char option;
     bool wasInvalid = false;
+    std::string message;
     do {
         clearScreen();
         drawBoard();
@@ -109,12 +110,14 @@ void Player::initBoard() {
                      "3. Reset board\n"
                      "4. Commit board\n"
                   << std::endl;
-        if (wasInvalid) {
-            std::cout << "Invalid option \"" << option << "\" selected"
-                      << std::endl
-                      << std::endl;
+        if (message.length() > 0) {
+            if (wasInvalid) {
+                std::cout << "Error!" << std::endl;
+                wasInvalid = false;
+            }
+            std::cout << message << std::endl << std::endl;
+            message = "";
         }
-        wasInvalid = false;
         std::cin >> option;
         std::cin.clear();
         switch (option) {
@@ -129,11 +132,15 @@ void Player::initBoard() {
             break;
         case '4':
             commitBoard();
+            if (!commitBoard()) {
+                wasInvalid = true;
+                message = "Please first place all ships before committing";
+            }
             break;
         default:
             wasInvalid = true;
         }
-    } while (option != '4');
+    } while (true);
 }
 
 void Player::initPlayer() {
@@ -497,8 +504,9 @@ void Player::resetBoard() {
     }
 }
 
-void Player::commitBoard() {
+bool Player::commitBoard() {
     // commit board
+    return ships.size() == 10; // FIXME magic number
 }
 
 void Player::clearScreen() {
