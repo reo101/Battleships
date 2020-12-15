@@ -59,7 +59,7 @@ class Player {
     void selectCoordinatesForShip(int, bool = true);
     bool tryPlacingShip(int, int, int, char, bool = true);
     void editShip();
-    void tryEditingShip(int);
+    void tryChaningCoordinatesForShip(int);
     void hideShip(int);
     void showShip(int);
     void resetBoard();
@@ -456,11 +456,11 @@ void Player::editShip() {
             continue;
         }
 
-        tryEditingShip(option - 'A');
+        tryChaningCoordinatesForShip(option - 'A');
     } while (true);
 }
 
-void Player::tryEditingShip(int index) {
+void Player::tryChaningCoordinatesForShip(int index) {
     hideShip(index);
     selectCoordinatesForShip(index, false);
     // showShip(index);
