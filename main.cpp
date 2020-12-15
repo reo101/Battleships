@@ -483,6 +483,18 @@ void Player::showShip(int index) {
 
 void Player::resetBoard() {
     // reset board
+    remainingShips[0] = std::vector<Ship>(4, Ship(2));
+    remainingShips[1] = std::vector<Ship>(3, Ship(3));
+    remainingShips[2] = std::vector<Ship>(2, Ship(4));
+    remainingShips[3] = std::vector<Ship>(1, Ship(6));
+
+    ships.clear();
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            board[i][j] = 0;
+        }
+    }
 }
 
 void Player::commitBoard() {
