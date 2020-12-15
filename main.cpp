@@ -419,13 +419,13 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction,
     }
 
     if (isNew) {
-        for (int i = 0; i < size; ++i) {
-            board[row + rowOffset * i][col + colOffset * i] = 1;
-        }
-
+        // Add new ship with set data
         ships.push_back(new Ship(size, col, row, direction));
         remainingShips[index].pop_back();
+
+        showShip(ships.size() - 1);
     } else {
+        // Edit exisiting ship data
         ships[index]->coords.x = col;
         ships[index]->coords.y = row;
         ships[index]->direction = direction;
