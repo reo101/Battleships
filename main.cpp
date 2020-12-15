@@ -490,6 +490,21 @@ void Player::showShip(int index) {
 
 void Player::resetBoard() {
     // reset board
+    char option;
+    do {
+        clearScreen();
+        drawBoard();
+        std::cout
+            << std::endl
+            << std::endl
+            << "Are you sure you want to reset the board (unreversable) (y/n)"
+            << std::endl;
+        std::cin >> option;
+        if (option == 'n') {
+            return;
+        }
+    } while (option != 'y');
+
     remainingShips[0] = std::vector<Ship>(4, Ship(2));
     remainingShips[1] = std::vector<Ship>(3, Ship(3));
     remainingShips[2] = std::vector<Ship>(2, Ship(4));
