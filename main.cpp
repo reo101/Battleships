@@ -77,11 +77,6 @@ class Player {
     std::string playerName;
 };
 
-// 4 x OO
-// 3 x OOO
-// 2 x OOOO
-// 1 x OOOOOO
-
 int main() {
 
     Player test;
@@ -147,25 +142,6 @@ void Player::initPlayer() {
     std::cin >> playerName;
 }
 
-// ╚ ╔ ╩ ╦ ╠ ═ ╬ ╣ ║ ╗ ╝
-// ╔═══╗
-// ║   ║
-// ╚═══╝
-// ╔═╦═╗
-// ╠═╬═╣
-// ╚═╩═╝
-// ╔═══╦═══╗
-// ║   ║   ║
-// ╠═══╬═══╣
-// ║   ║   ║
-// ╚═══╩═══╝
-// ╔═════╦═════╗
-// ║     ║     ║
-// ║     ║     ║
-// ╠═════╬═════╣
-// ║     ║     ║
-// ║     ║     ║
-// ╚═════╩═════╝
 void Player::drawBoard(bool drawLabels) { // Default value set in prototype
     char letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                       'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'};
@@ -474,18 +450,6 @@ void Player::editShip() {
         }
 
         tryEditingShip(option - 'A');
-
-        // for (int i = 0; i < (int)ships.size(); ++i) {
-        // if (i == option - '1') {
-        // if (remainingShips[i].size() == 0) {
-        // wasInvalid = true;
-        // message = "No more ships of that kind";
-        // continue;
-        //}
-        // selectCoordinatesForShip(i);
-        // continue;
-        //}
-        //}
     } while (true);
 }
 
