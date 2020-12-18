@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <stdlib.h> //temp for clearing screen
@@ -93,6 +94,23 @@ Player::Player() {
 
 Player::Player(std::string path) {
     // Import data from file
+    std::ifstream preset(path, std::ios::in);
+
+    char cellBuffer;
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            preset >> cellBuffer;
+
+            switch (cellBuffer) {
+            case '1':
+                board[i][j] = 1;
+            default:
+            case '0':
+                board[i][j] = 0;
+                break;
+            }
+        }
+    }
 }
 
 void Player::initBoard() {
