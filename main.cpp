@@ -13,13 +13,13 @@ void invertColours();
 void revertColours();
 
 class Coordinates {
-  private:
-    bool coordsSet = false;
-
   public:
     unsigned short x, y;
+    bool areSet = false;
 
     Coordinates() : x(), y() {}
+    Coordinates(const Coordinates &obj)
+        : x(obj.x), y(obj.y), areSet(obj.areSet) {}
     Coordinates(unsigned short _x, unsigned short _y) { // : x(_x), y(_y) {}
         set(_x, _y);
     }
@@ -30,10 +30,8 @@ class Coordinates {
         }
         x = _x;
         y = _y;
-        coordsSet = true;
+        areSet = true;
     }
-
-    bool areSet() { return coordsSet; }
 };
 
 struct Ship {
@@ -80,9 +78,9 @@ class Player {
 
 int main() {
 
-    Player test;
+    Player test("./presetBoard1.txt");
 
-    test.initBoard();
+    // test.initBoard();
 
     return 0;
 }
@@ -104,12 +102,127 @@ Player::Player(std::string path) {
             switch (cellBuffer) {
             case '1':
                 board[i][j] = 1;
+                break;
             default:
             case '0':
                 board[i][j] = 0;
                 break;
             }
         }
+    }
+
+    std::vector<Coordinates> heads;
+    for (int row = 0; row < BOARD_SIZE; ++row) {
+        for (int col = 0; col < BOARD_SIZE; ++col) {
+            if (board[row][col] == 1 &&
+                (!(row - 1 >= 0 && col - 1 >= 0 &&
+                   board[row - 1][col - 1] != 0)) &&
+                (!(row - 1 >= 0 && board[row - 1][col] != 0)) &&
+                (!(col - 1 >= 0 && board[row][col - 1] != 0)) &&
+                (!(row + 1 < BOARD_SIZE && col + 1 < BOARD_SIZE &&
+                   board[row + 1][col + 1] != 0))) {
+                board[row][col] = 3;
+                heads.push_back(Coordinates(col, row));
+            }
+        }
+    }
+
+    drawBoard();
+
+    int foundHeads = heads.size();
+    if (foundHeads != 10) {
+        resetBoard();
+        return;
+    }
+
+    for (int i = 0, tempSize, colOffset, rowOffset, col, row; i < foundHeads;
+         ++i) {
+        tempSize = 1;
+        col = heads[i].x; // FIXME COORDS ARE NOT SET (SEE PREV FIXME)
+        row = heads[i].y;
+        if (row + 1 < BOARD_SIZE && col + 1 < BOARD_SIZE &&
+            board[row + 1][col] == 1 && board[row][col + 1] == 1) {
+            // resetBoard();
+            return;
+        } else if (row + 1 < BOARD_SIZE && board[row + 1][col] == 1) {
+            // Down
+            rowOffset = 1;
+            colOffset = 0;
+        } else if (col + 1 < BOARD_SIZE && board[row][col + 1] == 1) {
+            // Right
+            rowOffset = 0;
+            colOffset = 1;
+        } else {
+            // Length is 1 welp
+            // resetBoard();
+            return;
+        }
+
+        for (int rowCheck = 0, colCheck = 0;
+             rowCheck < BOARD_SIZE && colCheck < BOARD_SIZE;) {
+            rowCheck = row + tempSize * rowOffset;
+            colCheck = col + tempSize * colOffset;
+            if (board[rowCheck][colCheck] == 1) {
+                if (colOffset == 1) {
+                    if ((!(rowCheck + 1 < BOARD_SIZE &&
+                           board[rowCheck + 1][colCheck] == 1)) &&
+                        (!(rowCheck - 1 >= 0 &&
+                           board[rowCheck - 1][colCheck] == 1))) {
+                        ++tempSize;
+                    } else {
+                        break;
+                    }
+                } else if (rowOffset == 1) {
+                    if ((!(colCheck + 1 < BOARD_SIZE &&
+                           board[rowCheck][colCheck + 1] == 1)) &&
+                        (!(colCheck - 1 >= 0 &&
+                           board[rowCheck][colCheck - 1] == 1))) {
+                        ++tempSize;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        ships.push_back(
+            new Ship(tempSize, col, row, (colOffset == 1 ? 'R' : 'D')));
+    }
+
+    int size = ships.size();
+    if (size != 10) {
+        // Not 10 ships welp
+        // resetBoard();
+        return;
+    }
+
+    int frequencies[4] = {};
+    for (int i = 0; i < size; ++i) {
+        switch (ships[i]->size) {
+        case 2:
+            ++frequencies[0];
+            break;
+        case 3:
+            ++frequencies[1];
+            break;
+        case 4:
+            ++frequencies[2];
+            break;
+        case 6:
+            ++frequencies[3];
+            break;
+        }
+    }
+
+    if (frequencies[0] == 4 && frequencies[1] == 3 && frequencies[2] == 2 &&
+        frequencies[3] == 1) {
+        // ok board
+        return;
+    } else {
+        // Invalid distribution of ships welp
+        // resetBoard();
+        return;
     }
 }
 
