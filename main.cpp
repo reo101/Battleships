@@ -20,16 +20,16 @@ class Coordinates {
     Coordinates() : x(), y() {}
     Coordinates(const Coordinates &obj)
         : x(obj.x), y(obj.y), areSet(obj.areSet) {}
-    Coordinates(unsigned short _x, unsigned short _y) { // : x(_x), y(_y) {}
-        set(_x, _y);
+    Coordinates(unsigned short x, unsigned short y) { // : x(_x), y(_y) {}
+        set(x, y);
     }
 
-    void set(unsigned short _x, unsigned short _y) {
+    void set(unsigned short x, unsigned short y) {
         if (x >= BOARD_SIZE || y >= BOARD_SIZE) {
             return;
         }
-        x = _x;
-        y = _y;
+        this->x = x;
+        this->y = y;
         areSet = true;
     }
 };
@@ -39,10 +39,11 @@ struct Ship {
     Coordinates coords;
     char direction;
     Ship(const Ship &ship)
-        : size(ship.size), coords(ship.coords.x, ship.coords.y) {}
-    Ship(int _size) : size(_size) {}
-    Ship(int _size, int _x, int _y, char _direction)
-        : size(_size), coords(_x, _y), direction(_direction) {}
+        : size(ship.size), coords(ship.coords.x, ship.coords.y),
+          direction(ship.direction) {}
+    Ship(int size) : size(size), direction() {}
+    Ship(int size, int x, int y, char direction)
+        : size(size), coords(x, y), direction(direction) {}
 };
 
 class Player {
@@ -78,9 +79,9 @@ class Player {
 
 int main() {
 
-    Player test("./presetBoard1.txt");
+    Player test;
 
-    // test.initBoard();
+    test.initBoard();
 
     return 0;
 }
@@ -319,10 +320,14 @@ void Player::drawBoard(bool drawLabels) { // Default value set in prototype
                 rowBuffer[col] = "\033[7;1m X \033[0m";
                 // rowBuffer[col] = " ∅ ";
                 break;
+            default:
+                std::cout << "BRUH BRUH BRUH " << board[row][col] << std::endl;
+                rowBuffer[col] = "\033[7;1mBRU\033[0m";
+                return; // FIXME
             }
         }
         // And print that buffer togheter with the line separator
-        bool shipHeadFound;
+        bool shipHeadFound = false;
         std::cout << "║ " << digits[row] << " ";
         for (int col = 0; col < BOARD_SIZE; ++col) {
             std::cout << "║";
@@ -614,6 +619,8 @@ void Player::showShip(int index) {
     (ships[index]->direction == 'R' ? xOffset : yOffset) = 1;
 
     for (int i = 0; i < ships[index]->size; ++i) {
+        std::cout << (ships[index]->coords.y + yOffset * i) << std::endl;
+        std::cout << (ships[index]->coords.x + xOffset * i) << std::endl;
         board[ships[index]->coords.y + yOffset * i]
              [ships[index]->coords.x + xOffset * i] = 1;
     }
