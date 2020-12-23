@@ -11,6 +11,7 @@ void printLine(int, std::string, std::string, std::string, std::string);
 void printChar(int, char);
 void invertColours();
 void revertColours();
+void clearScreen();
 
 class Coordinates {
   public:
@@ -64,8 +65,6 @@ class Player {
     void showShip(int);
     void resetBoard();
     bool commitBoard();
-
-    void clearScreen();
 
   private:
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
@@ -663,11 +662,6 @@ bool Player::commitBoard() {
     return ships.size() == 10; // FIXME magic number
 }
 
-void Player::clearScreen() {
-    system("clear"); // temp
-    // print ~50 emptylines
-}
-
 void printLine(int count, std::string str, std::string before = "",
                std::string between = "", std::string after = "") {
     std::cout << before;
@@ -688,3 +682,7 @@ void printChar(int count, char ch) {
 
 void invertColours() { std::cout << "\033[7;1m"; }
 void revertColours() { std::cout << "\033[0m"; }
+void clearScreen() {
+    system("clear"); // temp
+    // print ~50 emptylines
+}
