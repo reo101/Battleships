@@ -228,7 +228,7 @@ Player::Player(std::string path) {
 }
 
 void Player::initBoard() {
-    // initPlayer(); //FIXME
+    initPlayer(); // FIXME
     char option;
     bool wasInvalid = false;
     std::string message;
@@ -263,7 +263,6 @@ void Player::initBoard() {
             resetBoard();
             break;
         case '4':
-            commitBoard();
             if (!commitBoard()) {
                 wasInvalid = true;
                 message = "Please first place all ships before committing";
@@ -271,13 +270,15 @@ void Player::initBoard() {
             break;
         default:
             wasInvalid = true;
+            message = "Invalid option was selected";
+            break;
         }
     } while (true);
 }
 
 void Player::initPlayer() {
     clearScreen();
-    std::cout << std::endl << "Choose player name:" << std::endl;
+    std::cout << "Choose player name:" << std::endl;
     std::cin >> playerName;
 }
 
@@ -407,8 +408,8 @@ void Player::addShip() {
         }
 
         if (option - '1' < 0 || option - '1' > (int)remainingShips.size()) {
-            std::cout << "Invalid option selected" << std::endl;
             wasInvalid = true;
+            message = "Invalid option selected";
             continue;
         }
 
