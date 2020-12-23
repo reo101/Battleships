@@ -3,9 +3,11 @@
 
 int main() {
 
-    Player test;
+    Player player1("./presetBoard1.txt"), player2("./presetBoard2.txt");
 
-    test.initBoard();
+    player1.drawBoard(Player::drawType::NORMAL);
+    player1.drawBoard(Player::drawType::LABELS);
+    player1.drawBoard(Player::drawType::ENEMYPOV);
 
     return 0;
 }

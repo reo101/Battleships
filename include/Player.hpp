@@ -18,9 +18,11 @@ class Player {
     Player(std::string);
 
     void initBoard();
-    void initPlayer();
-    void drawBoard(bool = false);
+    enum drawType { NORMAL = 0, LABELS = 1, ENEMYPOV = 2 };
+    void drawBoard(int = drawType::NORMAL);
 
+  private:
+    void initPlayer();
     void addShip();
     void selectCoordinatesForShip(int, bool = true);
     bool tryPlacingShip(int, int, int, char, bool = true);
@@ -31,7 +33,6 @@ class Player {
     void resetBoard();
     bool commitBoard();
 
-  private:
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
     unsigned short board[BOARD_SIZE][BOARD_SIZE] = {};
     std::vector<std::vector<Ship>> remainingShips = {
@@ -77,13 +78,10 @@ Player::Player(std::string path) {
                 (!(col - 1 >= 0 && board[row][col - 1] != 0)) &&
                 (!(row + 1 < BOARD_SIZE && col + 1 < BOARD_SIZE &&
                    board[row + 1][col + 1] != 0))) {
-                board[row][col] = 3;
                 heads.push_back(Coordinates(col, row));
             }
         }
     }
-
-    drawBoard();
 
     int foundHeads = heads.size();
     if (foundHeads != 10) {
@@ -94,7 +92,7 @@ Player::Player(std::string path) {
     for (int i = 0, tempSize, colOffset, rowOffset, col, row; i < foundHeads;
          ++i) {
         tempSize = 1;
-        col = heads[i].x; // FIXME COORDS ARE NOT SET (SEE PREV FIXME)
+        col = heads[i].x;
         row = heads[i].y;
         if (row + 1 < BOARD_SIZE && col + 1 < BOARD_SIZE &&
             board[row + 1][col] == 1 && board[row][col + 1] == 1) {
@@ -237,7 +235,7 @@ void Player::initPlayer() {
     std::cin >> playerName;
 }
 
-void Player::drawBoard(bool drawLabels) { // Default value set in prototype
+void Player::drawBoard(int drawType) { // Default value set in prototype
     char letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                       'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'};
     char digits[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'X'};
@@ -260,56 +258,59 @@ void Player::drawBoard(bool drawLabels) { // Default value set in prototype
         // Make a 1-line rowBuffer
         for (int col = 0; col < BOARD_SIZE; ++col) {
             switch (board[row][col]) {
-            case 0: // water
-                rowBuffer[col] = " \033[m \033[0m ";
-                // rowBuffer[col] = "   ";
+            case 0: { // water
+                rowBuffer[col] = "\033[m   \033[0m";
                 break;
-            case 1: // hit water
-                rowBuffer[col] = "\033[7;1m   \033[0m";
-                // rowBuffer[col] = " ◯ ";
-                break;
-            case 2: // ship
-                rowBuffer[col] = " \033[1mX\033[0m ";
-                // rowBuffer[col] = " X ";
-                break;
-            case 3: // sunken ship
-                rowBuffer[col] = "\033[7;1m X \033[0m";
-                // rowBuffer[col] = " ∅ ";
-                break;
-            default:
-                std::cout << "BRUH BRUH BRUH " << board[row][col] << std::endl;
-                rowBuffer[col] = "\033[7;1mBRU\033[0m";
-                return; // FIXME
             }
-        }
-        // And print that buffer togheter with the line separator
-        bool shipHeadFound = false;
-        std::cout << "║ " << digits[row] << " ";
-        for (int col = 0; col < BOARD_SIZE; ++col) {
-            std::cout << "║";
-            if (drawLabels) {
-                for (size_t i = 0; i < ships.size(); ++i) {
-                    // std::cout << "Checking if col/row " << col << "/" << row
-                    //<< " is a ship at x/y " << ships[i]->coords.x
-                    //<< "/" << ships[i]->coords.y << std::endl;
-                    if (ships[i]->coords.x == col &&
-                        ships[i]->coords.y == row) {
+            case 1: { // ship
+                switch (drawType) {
+                case drawType::LABELS: {
+                    bool shipHeadFound = false;
+                    for (size_t i = 0; i < ships.size(); ++i) {
+                        if (ships[i]->coords.x == col &&
+                            ships[i]->coords.y == row) {
 
-                        invertColours();
-                        std::cout << " " << letters[i] << " ";
-                        revertColours();
+                            rowBuffer[col] = "\033[7;1m ";
+                            rowBuffer[col] += letters[i];
+                            rowBuffer[col] += " \033[0m";
 
-                        shipHeadFound = true;
+                            shipHeadFound = true;
+                            break;
+                        }
+                    }
+                    if (shipHeadFound) {
                         break;
                     }
                 }
+                case drawType::NORMAL: {
+                    rowBuffer[col] = "\033[7;1m   \033[0m";
+                    break;
+                }
+                case drawType::ENEMYPOV: {
+                    rowBuffer[col] = "\033[m   \033[0m";
+                    break;
+                }
+                default: {
+                    rowBuffer[col] = "BRU";
+                    break;
+                }
+                }
+                break;
             }
-            if (shipHeadFound) {
-                shipHeadFound = false;
-                continue;
-            } else {
-                std::cout << rowBuffer[col];
+            case 2: { // hit water
+                rowBuffer[col] = "\033[7;1m   \033[0m";
+                break;
             }
+            case 3: { // sunken ship
+                rowBuffer[col] = "\033[7;1m X \033[0m";
+                break;
+            }
+            }
+        }
+        // And print that buffer togheter with the line separator
+        std::cout << "║ " << digits[row] << " ";
+        for (int col = 0; col < BOARD_SIZE; ++col) {
+            std::cout << "║" << rowBuffer[col];
         }
         std::cout << "║" << std::endl;
         bool inMiddle = row < BOARD_SIZE - 1;
@@ -492,7 +493,6 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction,
             }
         }
     }
-
     if (isNew) {
         // Add new ship with set data
         ships.push_back(new Ship(size, col, row, direction));
@@ -518,7 +518,7 @@ void Player::editShip() {
     std::string message;
     do {
         clearScreen();
-        drawBoard(true);
+        drawBoard(drawType::LABELS);
         std::cout << std::endl
                   << "Select which ship to add or 0 to go back to main menu:"
                   << std::endl
@@ -588,11 +588,11 @@ void Player::resetBoard() {
     do {
         clearScreen();
         drawBoard();
-        std::cout
-            << std::endl
-            << std::endl
-            << "Are you sure you want to reset the board (unreversable) (y/n)"
-            << std::endl;
+        std::cout << std::endl
+                  << std::endl
+                  << "Are you sure you want to reset the board "
+                     "(unreversable) (y/n)"
+                  << std::endl;
         std::cin >> option;
         if (option == 'n') {
             return;
