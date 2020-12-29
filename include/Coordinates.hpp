@@ -3,9 +3,9 @@ const int BOARD_SIZE = 10;
 class Coordinates {
   public:
     unsigned short x, y;
-    bool areSet = false;
+    bool areSet;
 
-    Coordinates() : x(), y() {}
+    Coordinates() : x(), y(), areSet(false) {}
     Coordinates(const Coordinates &obj)
         : x(obj.x), y(obj.y), areSet(obj.areSet) {}
     Coordinates(unsigned short x, unsigned short y) { // : x(_x), y(_y) {}
