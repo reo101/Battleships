@@ -1,3 +1,4 @@
+#pragma once
 #include "Ship.hpp"
 #include <fstream>
 #include <iomanip>
@@ -20,6 +21,8 @@ class Player {
   public:
     Player();
     Player(std::string);
+
+    ~Player();
 
     void initBoard();
     void drawBoard(int = drawType::NORMAL);
@@ -180,6 +183,12 @@ Player::Player(std::string path) {
         // Invalid distribution of ships welp
         // resetBoard();
         return;
+    }
+}
+
+Player::~Player() {
+    for (int i = 0; i < ships.size(); ++i) {
+        delete ships[i];
     }
 }
 
