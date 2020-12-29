@@ -24,8 +24,15 @@ class Player {
 
     ~Player();
 
+    std::string getPlayerName();
+
     void initBoard();
+    bool isBoardSet();
     void drawBoard(int = drawType::NORMAL);
+
+    bool isHit(Coordinates);
+    bool tryHitting(Coordinates);
+    Coordinates selectCoordinatesForHitting(Player *);
 
   private:
     void initPlayer();
@@ -36,11 +43,12 @@ class Player {
     void tryChaningCoordinatesForShip(int);
     void hideShip(int);
     void showShip(int);
-    void resetBoard();
+    void resetBoard(bool = false);
     bool commitBoard();
 
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
     unsigned short board[BOARD_SIZE][BOARD_SIZE] = {};
+    bool boardSet = false;
     std::vector<std::vector<Ship>> remainingShips = {
         std::vector<Ship>(4, Ship(2)), std::vector<Ship>(3, Ship(3)),
         std::vector<Ship>(2, Ship(4)), std::vector<Ship>(1, Ship(6))};
@@ -91,7 +99,7 @@ Player::Player(std::string path) {
 
     int foundHeads = heads.size();
     if (foundHeads != 10) {
-        resetBoard();
+        resetBoard(true);
         return;
     }
 
@@ -114,7 +122,7 @@ Player::Player(std::string path) {
             colOffset = 1;
         } else {
             // Length is 1 welp
-            // resetBoard();
+            resetBoard(true);
             return;
         }
 
@@ -153,7 +161,7 @@ Player::Player(std::string path) {
     int size = ships.size();
     if (size != 10) {
         // Not 10 ships welp
-        // resetBoard();
+        resetBoard(true);
         return;
     }
 
@@ -178,10 +186,11 @@ Player::Player(std::string path) {
     if (frequencies[0] == 4 && frequencies[1] == 3 && frequencies[2] == 2 &&
         frequencies[3] == 1) {
         // ok board
+        this->boardSet = true;
         return;
     } else {
         // Invalid distribution of ships welp
-        // resetBoard();
+        resetBoard(true);
         return;
     }
 }
@@ -192,8 +201,10 @@ Player::~Player() {
     }
 }
 
+std::string Player::getPlayerName() { return this->playerName; }
+
 void Player::initBoard() {
-    initPlayer(); // FIXME
+    initPlayer();
     char option;
     bool wasInvalid = false;
     std::string message;
@@ -231,6 +242,9 @@ void Player::initBoard() {
             if (!commitBoard()) {
                 wasInvalid = true;
                 message = "Please first place all ships before committing";
+            } else {
+                this->boardSet = true;
+                return;
             }
             break;
         default:
@@ -238,6 +252,68 @@ void Player::initBoard() {
             message = "Invalid option was selected";
             break;
         }
+    } while (true);
+
+    this->boardSet = true;
+}
+
+bool Player::isBoardSet() { return this->boardSet; }
+
+bool Player::isHit(Coordinates coords) {
+    // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
+    return board[coords.y][coords.x] / 2 == 1;
+}
+
+bool Player::tryHitting(Coordinates coords) {
+    // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
+    return board[coords.y][coords.x] == 1;
+}
+
+Coordinates Player::selectCoordinatesForHitting(Player *enemy) {
+    char option[2];
+    int row, col;
+    bool wasInvalid = false;
+    std::string message;
+    do {
+        clearScreen();
+        enemy->drawBoard(drawType::ENEMYPOV);
+        std::cout << std::endl
+                  << "Select where to shoot (in format A1R [Column A-J, Row "
+                     "1-X]) or 0 to go back:"
+                  << std::endl
+                  << std::endl;
+
+        if (message.length() > 0) {
+            if (wasInvalid) {
+                std::cout << "Error!" << std::endl;
+                wasInvalid = false;
+            }
+            std::cout << message << std::endl << std::endl;
+            message = "";
+        }
+
+        std::cin >> option;
+        std::cin.clear();
+
+        if (option[1] == '\0' && option[0] == '0') {
+            return Coordinates();
+        }
+
+        col = option[0] - 'A';
+        if ((col < 0) || (col >= BOARD_SIZE)) {
+            message = "Invalid column selected";
+            wasInvalid = true;
+            continue;
+        }
+
+        row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
+        if ((row < 0) || (row >= BOARD_SIZE)) {
+            message = "Invalid row selected";
+            wasInvalid = true;
+            continue;
+        }
+
+        return Coordinates(col, row);
     } while (true);
 }
 
@@ -594,22 +670,24 @@ void Player::showShip(int index) {
     }
 }
 
-void Player::resetBoard() {
+void Player::resetBoard(bool byForce) {
     // reset board
-    char option;
-    do {
-        clearScreen();
-        drawBoard();
-        std::cout << std::endl
-                  << std::endl
-                  << "Are you sure you want to reset the board "
-                     "(unreversable) (y/n)"
-                  << std::endl;
-        std::cin >> option;
-        if (option == 'n') {
-            return;
-        }
-    } while (option != 'y');
+    if (byForce) {
+        char option;
+        do {
+            clearScreen();
+            drawBoard();
+            std::cout << std::endl
+                      << std::endl
+                      << "Are you sure you want to reset the board "
+                         "(unreversable) (y/n)"
+                      << std::endl;
+            std::cin >> option;
+            if (option == 'n') {
+                return;
+            }
+        } while (option != 'y');
+    }
 
     remainingShips[0] = std::vector<Ship>(4, Ship(2));
     remainingShips[1] = std::vector<Ship>(3, Ship(3));
