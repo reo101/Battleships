@@ -1,21 +1,45 @@
 RM = rm -f # for cleaning
 
 CXX = clang++ # g++
+LD = clang++ # g++
 CXXFLAGS = -std=c++11 -Wall # -std=c++0x -Wall
 CXXDEBUGFLAGS = -fsanitize=address # for tracing back 
+PROG_NAME = battleships
 
-OBJECTS = main.cpp
+SRC_DIR = ./src
+LIB_DIR = ./lib
+SRC_BUILD_DIR = ./build/src
+LIB_BUILD_DIR = ./build/lib
+BIN_DIR = ./bin
 
-$(OBJECTS): ./include/
+LIB_LIST = $(wildcard $(LIB_DIR)/*.cpp)
+LIB_HDR_LIST = $(wildcard $(LIB_DIR)/*.hpp)
 
-all: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@.out
+SRC_LIST = $(wildcard $(SRC_DIR)/*.cpp)
 
-debug: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $^ -o $@.out
+LIB_OBJ_LIST = $(addprefix $(LIB_BUILD_DIR)/, $(notdir $(LIB_LIST:.cpp=.o)))
+SRC_OBJ_LIST = $(addprefix $(SRC_BUILD_DIR)/, $(notdir $(SRC_LIST:.cpp=.o)))
+OBJ_LIST = $(LIB_OBJ_LIST) $(SRC_OBJ_LIST)
+
+all: $(PROG_NAME)
+
+target: $(PROG_NAME)
+
+$(PROG_NAME): compile
+	$(LD) $(OBJ_LIST) -o $(BIN_DIR)/$@.out
+
+compile: $(LIB_OBJ_LIST) $(SRC_OBJ_LIST)
+
+$(LIB_BUILD_DIR)/%.o: $(LIB_DIR)/%.cpp $(LIB_HDR_LIST)
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+$(SRC_BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(LIB_HDR_LIST)
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
 
 clean:
-	$(RM) *.out
+	$(RM) $(BIN_DIR)/$(PROG_NAME).out $(LIB_BUILD_DIR)/*.o $(SRC_BUILD_DIR)/*.o
 
 love:
 	@echo "not war"
+
+.PHONY: all #clean $(PROG_NAME) compileLIB compileSRC compile

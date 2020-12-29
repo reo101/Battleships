@@ -1,19 +1,4 @@
-#include "Player.hpp"
-#include <iostream>
-
-class Game {
-  public:
-    Game(int);
-    ~Game();
-
-  private:
-    std::vector<Player *> players;
-};
-
-bool fileExists(std::string fileName) {
-    std::ifstream infile(fileName);
-    return infile.good();
-}
+#include "Game.hpp"
 
 Game::Game(int playerCount) {
     std::string fileName;
@@ -43,7 +28,12 @@ Game::Game(int playerCount) {
 }
 
 Game::~Game() {
-    for (int i = 0; i < players.size(); ++i) {
+    for (size_t i = 0; i < players.size(); ++i) {
         delete players[i];
     }
+}
+
+bool fileExists(std::string fileName) {
+    std::ifstream infile(fileName);
+    return infile.good();
 }
