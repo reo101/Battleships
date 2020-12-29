@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 
+namespace drawType {
+enum drawType { NORMAL = 0, LABELS = 1, ENEMYPOV = 2 };
+}
+
 void printLine(int, std::string, std::string, std::string, std::string);
 void printChar(int, char);
 void invertColours();
@@ -18,7 +22,6 @@ class Player {
     Player(std::string);
 
     void initBoard();
-    enum drawType { NORMAL = 0, LABELS = 1, ENEMYPOV = 2 };
     void drawBoard(int = drawType::NORMAL);
 
   private:
