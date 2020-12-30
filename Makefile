@@ -1,10 +1,10 @@
-RM = rm -f # for cleaning
-MKDIR = mkdir -p # for build and bin folders (git doesnt track them)
+RM = rm -f
+MKDIR = mkdir -p
 
-CXX = clang++ # g++
-LD = clang++ # g++
-CXXFLAGS = -std=c++11 -Wall # -std=c++0x -Wall
-CXXDEBUGFLAGS = -fsanitize=address # for tracing back 
+CXX = clang++
+LD = clang++
+CXXFLAGS = -std=c++11 -Wall
+CXXDEBUGFLAGS = -fsanitize=address
 PROG_NAME = battleships
 
 SRC_DIR = ./src
@@ -52,4 +52,4 @@ clean:
 love:
 	@echo "not war"
 
-.PHONY: all #clean $(PROG_NAME) compileLIB compileSRC compile
+.PHONY: all
