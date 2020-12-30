@@ -10,6 +10,7 @@ class Game {
     ~Game();
 
   private:
+    void start();
     std::vector<Player *> players;
 };
 

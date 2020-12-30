@@ -27,6 +27,7 @@ class Player {
     ~Player();
 
     std::string getPlayerName();
+    void setPlayerName(std::string);
 
     void initBoard();
     bool isBoardSet();

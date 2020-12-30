@@ -147,6 +147,10 @@ Player::~Player() {
 
 std::string Player::getPlayerName() { return this->playerName; }
 
+void Player::setPlayerName(std::string playerName) {
+    this->playerName = playerName;
+}
+
 void Player::initBoard() {
     initPlayer();
     char option;
