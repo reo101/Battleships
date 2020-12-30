@@ -9,7 +9,7 @@ int main() {
     // player1.drawBoard(drawType::LABELS);
     // player1.drawBoard(drawType::ENEMYPOV);
 
-    Game game(2);
+    Game game(2, "presetBoard");
 
     return 0;
 }

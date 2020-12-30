@@ -6,7 +6,7 @@
 
 class Game {
   public:
-    Game(int);
+    Game(int, std::string);
     ~Game();
 
   private:
