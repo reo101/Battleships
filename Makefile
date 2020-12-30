@@ -26,7 +26,7 @@ all: $(PROG_NAME)
 
 target: $(PROG_NAME)
 
-$(PROG_NAME): compile $(BIN_DIR)
+$(PROG_NAME): compile | $(BIN_DIR)
 	$(LD) $(OBJ_LIST) -o $(BIN_DIR)/$@.out
 
 $(BIN_DIR):
@@ -52,4 +52,4 @@ clean:
 love:
 	@echo "not war"
 
-.PHONY: all
+.PHONY: all target compile clean love
