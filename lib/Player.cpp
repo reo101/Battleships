@@ -207,6 +207,18 @@ void Player::initBoard() {
 
 bool Player::isBoardSet() { return this->boardSet; }
 
+bool Player::checkLost() {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            if (board[i][j] == 1) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 bool Player::isHit(Coordinates coords) {
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
     return board[coords.y][coords.x] / 2 == 1;
@@ -214,20 +226,28 @@ bool Player::isHit(Coordinates coords) {
 
 bool Player::tryHitting(Coordinates coords) {
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
-    return board[coords.y][coords.x] == 1;
+    if (this->isHit(coords)) {
+        return false;
+    }
+    board[coords.y][coords.x] += 2;
+    return board[coords.y][coords.x] == 3;
 }
 
-Coordinates Player::selectCoordinatesForHitting(Player *enemy) {
+Coordinates Player::selectCoordinatesForHitting(Player *enemy,
+                                                Coordinates previousHit) {
     char option[2];
     int row, col;
-    bool wasInvalid = false;
+    bool wasInvalid = false, directionChosen;
     std::string message;
     do {
         clearScreen();
-        enemy->drawBoard(drawType::ENEMYPOV);
+        drawBoard(drawType::ENEMYPOV);
         std::cout << std::endl
+                  << enemy->getPlayerName() << "'s turn attacking "
+                  << this->getPlayerName() << std::endl
                   << "Select where to shoot (in format A1R [Column A-J, Row "
-                     "1-X]) or 0 to go back:"
+                     "1-X] or l,r,u,d for left, right, up or down of the last "
+                     "hit cell)"
                   << std::endl
                   << std::endl;
 
@@ -239,24 +259,62 @@ Coordinates Player::selectCoordinatesForHitting(Player *enemy) {
             std::cout << message << std::endl << std::endl;
             message = "";
         }
+        directionChosen = false;
 
         std::cin >> option;
         std::cin.clear();
 
-        if (option[1] == '\0' && option[0] == '0') {
-            return Coordinates();
+        if (option[1] == '\0') {
+
+            if (previousHit.areSet) {
+                switch (option[0]) {
+                case 'l':
+                    row = previousHit.y;
+                    col = previousHit.x - 1;
+                    directionChosen = true;
+                    break;
+                case 'r':
+                    row = previousHit.y;
+                    col = previousHit.x + 1;
+                    directionChosen = true;
+                    break;
+                case 'u':
+                    row = previousHit.y - 1;
+                    col = previousHit.x;
+                    directionChosen = true;
+                    break;
+                case 'd':
+                    row = previousHit.y + 1;
+                    col = previousHit.x;
+                    directionChosen = true;
+                    break;
+                }
+            }
+            if (option[0] == '0') {
+                return Coordinates();
+            }
         }
 
-        col = option[0] - 'A';
+        if (!directionChosen) {
+            col = option[0] - 'A';
+        }
         if ((col < 0) || (col >= BOARD_SIZE)) {
             message = "Invalid column selected";
             wasInvalid = true;
             continue;
         }
 
-        row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
+        if (!directionChosen) {
+            row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
+        }
         if ((row < 0) || (row >= BOARD_SIZE)) {
             message = "Invalid row selected";
+            wasInvalid = true;
+            continue;
+        }
+
+        if (this->isHit(Coordinates(col, row))) {
+            message = "Already hit";
             wasInvalid = true;
             continue;
         }
@@ -334,7 +392,7 @@ void Player::drawBoard(int drawType) { // Default value set in prototype
                 break;
             }
             case 2: { // hit water
-                rowBuffer[col] = "\033[7;1m   \033[0m";
+                rowBuffer[col] = "\033[m X \033[0m";
                 break;
             }
             case 3: { // sunken ship
@@ -676,6 +734,10 @@ void printChar(int count, char ch) {
 
 void invertColours() { std::cout << "\033[7;1m"; }
 void revertColours() { std::cout << "\033[0m"; }
+void stall() {
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.get();
+}
 void clearScreen() {
     system("clear"); // temp
     // print ~50 emptylines

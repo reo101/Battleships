@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <stdlib.h> //temp for clearing screen
 #include <string>
 #include <vector>
@@ -17,6 +18,7 @@ void printLine(int, std::string, std::string, std::string, std::string);
 void printChar(int, char);
 void invertColours();
 void revertColours();
+void stall();
 void clearScreen();
 
 class Player {
@@ -33,9 +35,11 @@ class Player {
     bool isBoardSet();
     void drawBoard(int = drawType::NORMAL);
 
+    bool checkLost();
     bool isHit(Coordinates);
     bool tryHitting(Coordinates);
-    Coordinates selectCoordinatesForHitting(Player *);
+    Coordinates selectCoordinatesForHitting(Player *,
+                                            Coordinates = Coordinates());
 
   private:
     void initPlayer();
