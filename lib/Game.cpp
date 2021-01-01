@@ -2,9 +2,11 @@
 
 Game::Game(int playerCount, std::string fileName) {
     std::string path, playerName;
+    bool hasToInit;
     for (int i = 0; i < playerCount; ++i) {
         path = "res/" + fileName + std::to_string(i + 1) + ".txt";
         // res/ + presetBoard + 1 + .txt = res/presetBoard1.txt
+        hasToInit = false;
 
         clearScreen();
         if (fileExists(path)) {
@@ -14,7 +16,8 @@ Game::Game(int playerCount, std::string fileName) {
                           << " has an invalid preset board file. You'll now "
                              "enter the manual board builder."
                           << std::endl;
-                players.back()->initBoard();
+                hasToInit = true;
+                // players.back()->initBoard();
             } else {
                 // players.back()->drawBoard(drawType::LABELS);
                 std::cout << "Player " << (i + 1)
@@ -26,14 +29,18 @@ Game::Game(int playerCount, std::string fileName) {
                          "enter the manual board builder."
                       << std::endl;
             players.push_back(new Player());
-            players.back()->initBoard();
+            hasToInit = true;
+            // players.back()->initBoard();
         }
         std::cout << "Enter Player " << (i + 1) << " name: ";
         std::cin >> playerName;
         // Set the selected player name
         players.back()->setPlayerName(playerName);
         // Stall to let user see the status messages
-        std::cin.get();
+        // stall();
+        if (hasToInit) {
+            players.back()->initBoard();
+        }
     }
 
     // All players are now fully init-ed

@@ -152,7 +152,6 @@ void Player::setPlayerName(std::string playerName) {
 }
 
 void Player::initBoard() {
-    initPlayer();
     char option;
     bool wasInvalid = false;
     std::string message;
@@ -160,7 +159,8 @@ void Player::initBoard() {
         clearScreen();
         drawBoard();
         std::cout << std::endl
-                  << "Please select an option:\n\n"
+                  << this->getPlayerName()
+                  << ", please select an option:\n\n"
                      "1. Add ship\n"
                      "2. Edit ship\n"
                      "3. Reset board\n"
@@ -678,7 +678,7 @@ void Player::showShip(int index) {
 
 void Player::resetBoard(bool byForce) {
     // reset board
-    if (byForce) {
+    if (!byForce) {
         char option;
         do {
             clearScreen();
