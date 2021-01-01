@@ -297,6 +297,9 @@ Coordinates Player::selectCoordinatesForHitting(Player *enemy,
 
         if (!directionChosen) {
             col = option[0] - 'A';
+            if ((col < 0) || (col >= BOARD_SIZE)) {
+                col = option[0] - 'a';
+            }
         }
         if ((col < 0) || (col >= BOARD_SIZE)) {
             message = "Invalid column selected";
@@ -305,7 +308,8 @@ Coordinates Player::selectCoordinatesForHitting(Player *enemy,
         }
 
         if (!directionChosen) {
-            row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
+            row = option[1] == 'X' || option[1] == 'x' ? BOARD_SIZE - 1
+                                                       : option[1] - '1';
         }
         if ((row < 0) || (row >= BOARD_SIZE)) {
             message = "Invalid row selected";
@@ -514,12 +518,16 @@ void Player::selectCoordinatesForShip(int index, bool isNew) {
 
         col = option[0] - 'A';
         if ((col < 0) || (col >= BOARD_SIZE)) {
-            message = "Invalid column selected";
-            wasInvalid = true;
-            continue;
+            col = option[0] - 'a';
+            if ((col < 0) || (col >= BOARD_SIZE)) {
+                message = "Invalid column selected";
+                wasInvalid = true;
+                continue;
+            }
         }
 
-        row = option[1] == 'X' ? BOARD_SIZE - 1 : option[1] - '1';
+        row = option[1] == 'X' || option[1] == 'x' ? BOARD_SIZE - 1
+                                                   : option[1] - '1';
         if ((row < 0) || (row >= BOARD_SIZE)) {
             message = "Invalid row selected";
             wasInvalid = true;
@@ -528,9 +536,12 @@ void Player::selectCoordinatesForShip(int index, bool isNew) {
 
         direction = option[2];
         if (direction != 'R' && direction != 'D') {
-            message = "Invalid direction selected";
-            wasInvalid = true;
-            continue;
+            direction = option[2] - 32;
+            if (direction != 'R' && direction != 'D') {
+                message = "Invalid direction selected";
+                wasInvalid = true;
+                continue;
+            }
         }
 
         success = tryPlacingShip(index, col, row, direction, isNew);
