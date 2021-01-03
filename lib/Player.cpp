@@ -750,6 +750,14 @@ void stall() {
     std::cin.get();
 }
 void clearScreen() {
-    system("clear"); // temp
-    // print ~50 emptylines
+#ifdef _WIN32
+    system("cls");
+#elif __linux__
+    system("clear");
+#else
+    for (int i = 0; i < 100; ++i) {
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
+#endif
 }
