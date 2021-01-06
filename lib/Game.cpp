@@ -61,6 +61,7 @@ bool Game::chooseAction(Player *currentPlayer, Player *enemy) {
         clearScreen();
         std::cout << currentPlayer->getPlayerName()
                   << ", please choose an action:" << std::endl
+                  << std::endl
                   << "1. Attack " << enemy->getPlayerName() << std::endl
                   << "2. View your own board" << std::endl
                   << std::endl;
@@ -132,7 +133,8 @@ void Game::start() {
                     // Water hit
                     clearScreen();
                     enemy->drawBoard(drawType::ENEMYPOV);
-                    std::cout << "Oh noooo... a miss. "
+                    std::cout << std::endl
+                              << "Oh noooo... a miss. "
                               << currentPlayer->getPlayerName()
                               << ", you didn't hit a ship. It's now your "
                                  "opponent's turn. Press Enter to continue"
@@ -146,7 +148,7 @@ void Game::start() {
             // View board
             clearScreen();
             currentPlayer->drawBoard();
-            std::cout << "Press Enter to return" << std::endl;
+            std::cout << std::endl << "Press Enter to return" << std::endl;
             stall();
         }
     }

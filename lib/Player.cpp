@@ -246,10 +246,12 @@ Coordinates Player::selectCoordinatesForHitting(Player *enemy,
                   << enemy->getPlayerName() << "'s turn attacking "
                   << this->getPlayerName() << std::endl
                   << "Select where to shoot (in format A1R [Column A-J, Row "
-                     "1-X] or l,r,u,d for left, right, up or down of the last "
-                     "hit cell)"
-                  << std::endl
-                  << std::endl;
+                     "1-X]";
+        if (previousHit.areSet) {
+            std::cout << " or l,r,u,d for left, right, up or down of the last "
+                         "hit cell";
+        }
+        std::cout << ")" << std::endl << std::endl;
 
         if (message.length() > 0) {
             if (wasInvalid) {
@@ -598,6 +600,7 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction,
             }
         }
     }
+
     if (isNew) {
         // Add new ship with set data
         ships.push_back(new Ship(size, col, row, direction));
