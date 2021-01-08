@@ -36,6 +36,7 @@ class Player {
     void drawBoard(int = drawType::NORMAL);
 
     bool checkLost();
+    bool checkSunken(Coordinates);
     bool isHit(Coordinates);
     bool tryHitting(Coordinates);
     Coordinates selectCoordinatesForHitting(Player *,

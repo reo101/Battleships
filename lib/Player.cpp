@@ -219,6 +219,32 @@ bool Player::checkLost() {
     return true;
 }
 
+bool Player::checkSunken(Coordinates coords) {
+    Coordinates coordsForChecking;
+    for (int i = 0, xOffset, yOffset; i < 4; ++i) {
+        xOffset = 2 * (i / 2) - 1; // -1 -1  1 1
+        yOffset = 2 * (i % 2) - 1; // -1  1 -1 1
+
+        coordsForChecking = coords;
+
+        do {
+            coordsForChecking.x += xOffset;
+            coordsForChecking.y += yOffset;
+        } while (
+            ((coordsForChecking.x >= 0 && coordsForChecking.x < BOARD_SIZE) &&
+             (coordsForChecking.y >= 0 && coordsForChecking.y < BOARD_SIZE)) &&
+            board[coordsForChecking.y][coordsForChecking.x] == 3);
+
+        if (((coordsForChecking.x >= 0 && coordsForChecking.x < BOARD_SIZE) &&
+             (coordsForChecking.y >= 0 && coordsForChecking.y < BOARD_SIZE)) &&
+            board[coordsForChecking.y][coordsForChecking.x] == 1) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool Player::isHit(Coordinates coords) {
     // 0 -> water, 1-> ship, 2 -> hit water, 3 -> sunken ship
     return board[coords.y][coords.x] / 2 == 1;

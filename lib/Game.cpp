@@ -122,12 +122,13 @@ void Game::start() {
                 enemy->drawBoard(drawType::ENEMYPOV);
                 if (hit) {
                     // Successful hit
-                    std::cout
-                        << std::endl
-                        << currentPlayer->getPlayerName()
-                        << ", you've hit a ship! It's you turn again. Press "
-                           "Enter to continue"
-                        << std::endl;
+                    std::cout << std::endl
+                              << currentPlayer->getPlayerName() << ", you've "
+                              << (currentPlayer->checkSunken(lastHit) ? "sunk"
+                                                                      : "hit")
+                              << " a ship! It's you turn again. Press "
+                                 "Enter to continue"
+                              << std::endl;
                     stall();
                 } else {
                     // Water hit
