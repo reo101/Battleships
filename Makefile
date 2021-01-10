@@ -1,8 +1,8 @@
 RM = rm -f
 MKDIR = mkdir -p
 
-CXX = clang++
-LD = clang++
+CXX = g++
+LD = g++
 CXXFLAGS = -std=c++11 -Wall
 CXXDEBUGFLAGS = -fsanitize=address
 PROG_NAME = battleships
