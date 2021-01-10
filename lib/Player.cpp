@@ -161,7 +161,7 @@ Player::Player(std::string path) {
 }
 
 Player::~Player() {
-    for (int i = 0; i < ships.size(); ++i) {
+    for (size_t i = 0; i < ships.size(); ++i) {
         delete ships[i];
     }
 }
@@ -243,8 +243,9 @@ bool Player::checkLost() {
 bool Player::checkSunken(Coordinates coords) {
     Coordinates coordsForChecking;
     for (int i = 0, xOffset, yOffset; i < 4; ++i) {
-        xOffset = 2 * (i / 2) - 1; // -1 -1  1 1
-        yOffset = 2 * (i % 2) - 1; // -1  1 -1 1
+
+        xOffset = (!(i / 2) + 2 * (i / 2) * (i % 2)) - 1; // 0 0 -1 1
+        yOffset = ((i / 2) + 2 * !(i / 2) * (i % 2)) - 1; // -1 1 0 0
 
         coordsForChecking = coords;
 
@@ -562,6 +563,10 @@ void Player::selectCoordinatesForShip(int index, bool isNew) {
         std::cin.clear();
 
         if (option[1] == '\0' && option[0] == '0') {
+            if (!isNew) {
+                // Reshow unedited ship
+                showShip(index);
+            }
             return;
         }
 
@@ -622,8 +627,8 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction,
         break;
     }
 
-    if (row + size * rowOffset > BOARD_SIZE ||
-        col + size * colOffset > BOARD_SIZE) {
+    if (row + size * rowOffset >= BOARD_SIZE ||
+        col + size * colOffset >= BOARD_SIZE) {
         return false;
     }
 
@@ -633,11 +638,11 @@ bool Player::tryPlacingShip(int index, int col, int row, char direction,
         }
     }
 
-    for (int i = row - 1; i <= row + 1 + rowOffset * size; ++i) {
+    for (int i = row - 1; i <= row + 1 + rowOffset * (size - 1); ++i) {
         if ((i < 0) || (i >= BOARD_SIZE)) {
             continue;
         }
-        for (int j = col - 1; j <= col + 1 + colOffset * size; ++j) {
+        for (int j = col - 1; j <= col + 1 + colOffset * (size - 1); ++j) {
             if ((j < 0) || (j >= BOARD_SIZE)) {
                 continue;
             }
